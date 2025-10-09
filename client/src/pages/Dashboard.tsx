@@ -6,23 +6,39 @@ import { Heart, MessageCircle, Star, Calendar, User } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Dashboard() {
-  const userId = localStorage.getItem("userId");
+  const { data: currentUser, isLoading: isLoadingUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+  });
+
+  const userId = (currentUser as any)?.user?.id;
 
   const { data: profile } = useQuery({
     queryKey: ["/api/profiles/user", userId],
+    enabled: !!userId,
   });
 
   const { data: matchesData } = useQuery({
     queryKey: ["/api/matches/user", userId],
+    enabled: !!userId,
   });
 
   const { data: favoritesData } = useQuery({
     queryKey: ["/api/favorites/user", userId],
+    enabled: !!userId,
   });
 
   const { data: registrationsData } = useQuery({
     queryKey: ["/api/event-registrations/user", userId],
+    enabled: !!userId,
   });
+
+  if (isLoadingUser) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   if (!userId) {
     return (

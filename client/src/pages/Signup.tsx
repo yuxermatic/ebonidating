@@ -46,13 +46,10 @@ export default function Signup() {
   async function onSubmit(data: SignupForm) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/auth/signup", {
+      await apiRequest("POST", "/api/auth/signup", {
         email: data.email,
         password: data.password,
       });
-
-      const { user } = await response.json();
-      localStorage.setItem("userId", user.id);
       
       toast({
         title: "Welcome to Eboni Dating!",
@@ -156,9 +153,9 @@ export default function Signup() {
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/login">
-              <a className="text-primary font-medium hover:underline" data-testid="link-login">
+              <span className="text-primary font-medium hover:underline cursor-pointer" data-testid="link-login">
                 Sign in
-              </a>
+              </span>
             </Link>
           </p>
         </div>
