@@ -65,6 +65,7 @@ export default function CreateProfile() {
       interests: [],
       photos: [],
     },
+    mode: "onChange",
   });
 
   const toggleInterest = (interest: string) => {
@@ -87,16 +88,7 @@ export default function CreateProfile() {
   async function onSubmit(data: ProfileForm) {
     setIsLoading(true);
     try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        setLocation("/login");
-        return;
-      }
-
-      await apiRequest("POST", "/api/profiles", {
-        ...data,
-        userId,
-      });
+      await apiRequest("POST", "/api/profiles", data);
 
       toast({
         title: "Profile created!",
@@ -151,7 +143,11 @@ export default function CreateProfile() {
                         placeholder="25" 
                         data-testid="input-age"
                         {...field}
-                        onChange={e => field.onChange(parseInt(e.target.value))}
+                        onChange={e => {
+                          const val = e.target.value;
+                          field.onChange(val === '' ? 0 : parseInt(val, 10));
+                        }}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />

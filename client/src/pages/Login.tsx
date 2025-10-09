@@ -41,10 +41,7 @@ export default function Login() {
   async function onSubmit(data: LoginForm) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/auth/login", data);
-
-      const { user } = await response.json();
-      localStorage.setItem("userId", user.id);
+      await apiRequest("POST", "/api/auth/login", data);
       
       toast({
         title: "Welcome back!",
@@ -129,9 +126,9 @@ export default function Login() {
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link href="/signup">
-              <a className="text-primary font-medium hover:underline" data-testid="link-signup">
+              <span className="text-primary font-medium hover:underline cursor-pointer" data-testid="link-signup">
                 Sign up
-              </a>
+              </span>
             </Link>
           </p>
         </div>

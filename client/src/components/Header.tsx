@@ -14,14 +14,27 @@ export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    setIsLoggedIn(!!userId);
+    // Check if user is logged in by trying to fetch current user
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(res => {
+        setIsLoggedIn(res.ok);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
   }, [location]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("userId");
-    setIsLoggedIn(false);
-    setLocation("/");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setIsLoggedIn(false);
+      setLocation("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const navLinks = [
@@ -49,15 +62,15 @@ export function Header() {
                 href={link.href}
                 data-testid={`link-${link.label.toLowerCase()}`}
               >
-                <a
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                <span
+                  className={`text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
                     location === link.href
                       ? "text-primary"
                       : "text-muted-foreground"
                   }`}
                 >
                   {link.label}
-                </a>
+                </span>
               </Link>
             ))}
           </nav>
@@ -102,32 +115,38 @@ export function Header() {
                 <nav className="flex flex-col gap-4 mt-8" role="navigation" aria-label="Mobile navigation">
                   {navLinks.map((link) => (
                     <Link key={link.href} href={link.href}>
-                      <a
-                        className={`text-lg font-medium transition-colors hover:text-primary ${
+                      <span
+                        className={`text-lg font-medium transition-colors hover:text-primary cursor-pointer ${
                           location === link.href
                             ? "text-primary"
                             : "text-muted-foreground"
                         }`}
                       >
                         {link.label}
-                      </a>
+                      </span>
                     </Link>
                   ))}
                   <div className="flex flex-col gap-2 mt-4">
                     {isLoggedIn ? (
                       <>
                         <Link href="/dashboard">
-                          <Button variant="ghost" className="w-full">Dashboard</Button>
+                          <Button variant="ghost" className="w-full" asChild>
+                            <span>Dashboard</span>
+                          </Button>
                         </Link>
                         <Button variant="outline" onClick={handleLogout} className="w-full">Sign Out</Button>
                       </>
                     ) : (
                       <>
                         <Link href="/login">
-                          <Button variant="ghost" className="w-full">Sign In</Button>
+                          <Button variant="ghost" className="w-full" asChild>
+                            <span>Sign In</span>
+                          </Button>
                         </Link>
                         <Link href="/signup">
-                          <Button className="w-full">Sign Up</Button>
+                          <Button className="w-full" asChild>
+                            <span>Sign Up</span>
+                          </Button>
                         </Link>
                       </>
                     )}
