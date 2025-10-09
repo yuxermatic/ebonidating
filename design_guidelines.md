@@ -1,4 +1,4 @@
-# ebpni Dating Platform - Design Guidelines
+# Eboni Dating Platform - Design Guidelines
 
 ## Design Approach: Reference-Based Premium Dating Experience
 
