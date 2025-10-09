@@ -7,9 +7,22 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useState, useEffect } from "react";
 
 export function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    setIsLoggedIn(!!userId);
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    setIsLoggedIn(false);
+    setLocation("/");
+  };
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -29,7 +42,7 @@ export function Header() {
             <span className="font-serif text-xl font-bold">Eboni Dating</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6" role="navigation" aria-label="Main navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -52,22 +65,41 @@ export function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <div className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" data-testid="button-login">
-                Sign In
-              </Button>
-              <Button data-testid="button-signup">
-                Sign Up
-              </Button>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="ghost" data-testid="button-dashboard">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" data-testid="button-login">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button data-testid="button-signup">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-menu">
+                <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-menu" aria-label="Open menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
-                <nav className="flex flex-col gap-4 mt-8">
+                <nav className="flex flex-col gap-4 mt-8" role="navigation" aria-label="Mobile navigation">
                   {navLinks.map((link) => (
                     <Link key={link.href} href={link.href}>
                       <a
@@ -82,8 +114,23 @@ export function Header() {
                     </Link>
                   ))}
                   <div className="flex flex-col gap-2 mt-4">
-                    <Button variant="ghost">Sign In</Button>
-                    <Button>Sign Up</Button>
+                    {isLoggedIn ? (
+                      <>
+                        <Link href="/dashboard">
+                          <Button variant="ghost" className="w-full">Dashboard</Button>
+                        </Link>
+                        <Button variant="outline" onClick={handleLogout} className="w-full">Sign Out</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login">
+                          <Button variant="ghost" className="w-full">Sign In</Button>
+                        </Link>
+                        <Link href="/signup">
+                          <Button className="w-full">Sign Up</Button>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>

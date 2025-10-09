@@ -9,6 +9,10 @@ import Home from "@/pages/Home";
 import Browse from "@/pages/Browse";
 import Events from "@/pages/Events";
 import Membership from "@/pages/Membership";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import CreateProfile from "@/pages/CreateProfile";
+import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +22,10 @@ function Router() {
       <Route path="/browse" component={Browse} />
       <Route path="/events" component={Events} />
       <Route path="/membership" component={Membership} />
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/create-profile" component={CreateProfile} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>
   );
