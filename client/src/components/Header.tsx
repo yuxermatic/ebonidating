@@ -26,7 +26,7 @@ export function Header() {
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
               <Heart className="h-5 w-5" />
             </div>
-            <span className="font-serif text-xl font-bold">EbonDating</span>
+            <span className="font-serif text-xl font-bold">Eboni Dating</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">

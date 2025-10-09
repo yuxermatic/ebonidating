@@ -28,7 +28,7 @@ export default function Membership() {
       <div className="mt-16">
         <Card className="p-8">
           <h2 className="text-2xl font-serif font-bold mb-6 text-center">
-            Why Join EbonDating Premium?
+            Why Join Eboni Dating Premium?
           </h2>
           <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
             {benefits.map((benefit) => (
