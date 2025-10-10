@@ -1,4 +1,3 @@
-
 import { Link } from "wouter";
 import { Heart, Mail, MapPin, Phone } from "lucide-react";
 

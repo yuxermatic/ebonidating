@@ -1,35 +1,30 @@
+"use client"
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation } from "wouter";
-import { supabase } from "@/lib/supabase";
-import { Heart } from "lucide-react";
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { Link, useLocation } from "wouter"
+import { supabase } from "@/lib/supabase"
+import { Heart } from "lucide-react"
+import { apiRequest } from "@/lib/apiRequest" // Assuming apiRequest is defined somewhere
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
-});
+})
 
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = z.infer<typeof loginSchema>
 
 export default function Login() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -37,32 +32,40 @@ export default function Login() {
       email: "",
       password: "",
     },
-  });
+  })
 
   async function onSubmit(data: LoginForm) {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      if (supabase) {
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        })
 
-      if (error) throw error;
-      
+        if (error) throw error
+      } else {
+        // Fallback to API authentication
+        const response = await apiRequest("POST", "/api/auth/login", data)
+        if (!response.ok) {
+          throw new Error("Login failed")
+        }
+      }
+
       toast({
         title: "Welcome back!",
         description: "Successfully logged in",
-      });
-      
-      setLocation("/dashboard");
+      })
+
+      setLocation("/dashboard")
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Invalid credentials",
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -86,12 +89,7 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="your@email.com" 
-                      type="email"
-                      data-testid="input-email"
-                      {...field} 
-                    />
+                    <Input placeholder="your@email.com" type="email" data-testid="input-email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,24 +103,14 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter your password" 
-                      type="password"
-                      data-testid="input-password"
-                      {...field} 
-                    />
+                    <Input placeholder="Enter your password" type="password" data-testid="input-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-              data-testid="button-login"
-            >
+            <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-login">
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
@@ -140,5 +128,5 @@ export default function Login() {
         </div>
       </Card>
     </div>
-  );
+  )
 }

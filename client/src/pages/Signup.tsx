@@ -1,39 +1,36 @@
+"use client"
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation } from "wouter";
-import { supabase } from "@/lib/supabase";
-import { Heart } from "lucide-react";
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { Link, useLocation } from "wouter"
+import { supabase } from "@/lib/supabase"
+import { Heart } from "lucide-react"
+import { apiRequest } from "@/lib/api" // Import apiRequest for fallback authentication
 
-const signupSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const signupSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
 
-type SignupForm = z.infer<typeof signupSchema>;
+type SignupForm = z.infer<typeof signupSchema>
 
 export default function Signup() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
@@ -42,35 +39,52 @@ export default function Signup() {
       password: "",
       confirmPassword: "",
     },
-  });
+  })
 
   async function onSubmit(data: SignupForm) {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/create-profile`,
+      if (supabase) {
+        const { data: authData, error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/create-profile`,
+          },
+        })
+
+        if (error) throw error
+
+        toast({
+          title: "Check your email!",
+          description: "We've sent you a verification link to complete your registration.",
+        })
+      } else {
+        // Fallback to API authentication
+        const response = await apiRequest("POST", "/api/auth/signup", {
+          email: data.email,
+          password: data.password,
+        })
+
+        if (!response.ok) {
+          throw new Error("Signup failed")
         }
-      });
 
-      if (error) throw error;
+        toast({
+          title: "Account created!",
+          description: "You can now log in with your credentials.",
+        })
+      }
 
-      toast({
-        title: "Check your email!",
-        description: "We've sent you a verification link to complete your registration.",
-      });
-      
-      setLocation("/login");
+      setLocation("/login")
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to create account",
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -94,12 +108,7 @@ export default function Signup() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="your@email.com" 
-                      type="email"
-                      data-testid="input-email"
-                      {...field} 
-                    />
+                    <Input placeholder="your@email.com" type="email" data-testid="input-email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,11 +122,11 @@ export default function Signup() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="At least 8 characters" 
+                    <Input
+                      placeholder="At least 8 characters"
                       type="password"
                       data-testid="input-password"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -132,11 +141,11 @@ export default function Signup() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Repeat your password" 
+                    <Input
+                      placeholder="Repeat your password"
                       type="password"
                       data-testid="input-confirm-password"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,12 +153,7 @@ export default function Signup() {
               )}
             />
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-              data-testid="button-signup"
-            >
+            <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-signup">
               {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
@@ -167,5 +171,5 @@ export default function Signup() {
         </div>
       </Card>
     </div>
-  );
+  )
 }
