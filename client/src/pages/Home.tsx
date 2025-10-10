@@ -29,8 +29,15 @@ export default function Home() {
   useEffect(() => {
     const fetchTopModels = async () => {
       try {
-        const response = await apiRequest("GET", "/api/profiles/top-models");
-        setTopModels(response.profiles || []);
+        // First try to get featured models
+        const featuredResponse = await apiRequest("GET", "/api/profiles/featured");
+        if (featuredResponse.models && featuredResponse.models.length > 0) {
+          setTopModels(featuredResponse.models);
+        } else {
+          // Fallback to top models if no featured models
+          const response = await apiRequest("GET", "/api/profiles/top-models");
+          setTopModels(response.profiles || []);
+        }
       } catch (error) {
         console.error("Failed to fetch top models:", error);
       }

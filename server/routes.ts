@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 import {
   insertUserSchema,
   insertProfileSchema,
@@ -11,6 +12,30 @@ import {
   insertMessageSchema,
   insertFavoriteSchema,
 } from "@shared/schema";
+
+// Email configuration
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || "info@ebonidating.com",
+    pass: process.env.SMTP_PASSWORD || "",
+  },
+});
+
+async function sendEmail(to: string, subject: string, html: string) {
+  try {
+    await transporter.sendMail({
+      from: '"Eboni Dating" <info@ebonidating.com>',
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error("Email send error:", error);
+  }
+}
 
 // Extend session types
 declare module "express-session" {
@@ -116,6 +141,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============= PROFILE ROUTES =============
+  app.get("/api/profiles/featured", async (req, res) => {
+    try {
+      const profiles = await storage.getAllProfiles();
+      // Get featured models (verified with premium/vip membership)
+      const featuredModels = profiles
+        .filter(p => p.isVerified && (p.membershipTier === 'premium' || p.membershipTier === 'vip'))
+        .slice(0, 3);
+      
+      res.json({ models: featuredModels });
+    } catch (error: any) {
+      console.error('[Featured Models Error]', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch featured models' });
+    }
+  });
+
   app.get("/api/profiles/top-models", async (req, res) => {
     try {
       const profiles = await storage.getAllProfiles();
