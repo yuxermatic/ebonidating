@@ -11,7 +11,14 @@ import {
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 
-const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
+const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL, {
+  fetchOptions: {
+    cache: 'no-store',
+  },
+  ...(process.env.NODE_ENV === 'production' && {
+    ssl: true,
+  }),
+}) : null;
 
 export interface IStorage {
   // Users
