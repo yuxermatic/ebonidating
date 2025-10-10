@@ -144,6 +144,25 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
   createdAt: true,
 });
 
+// Featured Model Schema
+export const featuredModelSchema = z.object({
+  id: z.string(),
+  profileId: z.string(),
+  featuredType: z.enum(["day", "week", "month"]),
+  startDate: z.date(),
+  endDate: z.date(),
+  imageUrl: z.string(),
+  createdAt: z.date(),
+});
+
+export type FeaturedModel = z.infer<typeof featuredModelSchema>;
+export type InsertFeaturedModel = Omit<FeaturedModel, "id" | "createdAt">;
+
+export const insertFeaturedModelSchema = featuredModelSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -168,6 +187,9 @@ export type Message = typeof messages.$inferSelect;
 
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+
+export type InsertFeaturedModel = z.infer<typeof insertFeaturedModelSchema>;
+export type FeaturedModelType = typeof featuredModelSchema.$inferSelect;
 
 // Model earnings table
 export const modelEarnings = pgTable("model_earnings", {

@@ -101,6 +101,16 @@ CREATE TABLE IF NOT EXISTS model_subscriptions (
   created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS featured_models (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id VARCHAR NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  featured_type TEXT NOT NULL CHECK (featured_type IN ('day', 'week', 'month')),
+  start_date TIMESTAMP NOT NULL,
+  end_date TIMESTAMP NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_verified ON profiles(is_verified);

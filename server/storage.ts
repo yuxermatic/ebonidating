@@ -19,6 +19,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
+  // Featured Models
+  getFeaturedModel(type: "day" | "week" | "month"): Promise<any | undefined>;
+  createFeaturedModel(model: any): Promise<any>;
+  getActiveFeaturedModels(): Promise<any[]>;
+  
   // Profiles
   getProfile(id: string): Promise<Profile | undefined>;
   getProfileByUserId(userId: string): Promise<Profile | undefined>;
@@ -365,6 +370,31 @@ export class MemStorage implements IStorage {
   async deleteFavorite(id: string): Promise<void> {
     this.favorites.delete(id);
   }
+
+  // Featured Models
+  async getFeaturedModel(type: "day" | "week" | "month"): Promise<any | undefined> {
+    const now = new Date();
+    return Array.from(this.profiles.values())
+      .filter(p => p.isVerified && p.membershipTier !== 'basic')
+      .sort((a, b) => {
+        const tierOrder = { vip: 3, premium: 2, basic: 1 };
+        return tierOrder[b.membershipTier as keyof typeof tierOrder] - tierOrder[a.membershipTier as keyof typeof tierOrder];
+      })[0];
+  }
+
+  async createFeaturedModel(model: any): Promise<any> {
+    return model;
+  }
+
+  async getActiveFeaturedModels(): Promise<any[]> {
+    return Array.from(this.profiles.values())
+      .filter(p => p.isVerified && p.membershipTier !== 'basic')
+      .sort((a, b) => {
+        const tierOrder = { vip: 3, premium: 2, basic: 1 };
+        return tierOrder[b.membershipTier as keyof typeof tierOrder] - tierOrder[a.membershipTier as keyof typeof tierOrder];
+      })
+      .slice(0, 3);
+  }
 }
 
 // PostgreSQL Storage Implementation
@@ -675,6 +705,41 @@ export class PostgresStorage implements IStorage {
 
   async deleteFavorite(id: string): Promise<void> {
     await this.sql`DELETE FROM favorites WHERE id = ${id}`;
+  }
+
+  // Featured Models
+  async getFeaturedModel(type: "day" | "week" | "month"): Promise<any | undefined> {
+    const result = await this.sql`
+      SELECT p.* FROM profiles p
+      LEFT JOIN featured_models fm ON p.id = fm.profile_id
+      WHERE fm.featured_type = ${type}
+        AND fm.start_date <= NOW()
+        AND fm.end_date >= NOW()
+      ORDER BY fm.created_at DESC
+      LIMIT 1
+    `;
+    return result[0];
+  }
+
+  async createFeaturedModel(model: any): Promise<any> {
+    const id = randomUUID();
+    const result = await this.sql`
+      INSERT INTO featured_models (id, profile_id, featured_type, start_date, end_date, image_url, created_at)
+      VALUES (${id}, ${model.profileId}, ${model.featuredType}, ${model.startDate}, ${model.endDate}, ${model.imageUrl}, NOW())
+      RETURNING *
+    `;
+    return result[0];
+  }
+
+  async getActiveFeaturedModels(): Promise<any[]> {
+    const result = await this.sql`
+      SELECT p.*, fm.featured_type, fm.image_url as featured_image
+      FROM profiles p
+      INNER JOIN featured_models fm ON p.id = fm.profile_id
+      WHERE fm.start_date <= NOW() AND fm.end_date >= NOW()
+      ORDER BY fm.created_at DESC
+    `;
+    return result as any[];
   }
 }
 
