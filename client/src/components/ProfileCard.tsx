@@ -31,7 +31,7 @@ export function ProfileCard({
   const [isLiked, setIsLiked] = useState(false);
 
   return (
-    <Card className="overflow-hidden hover-elevate relative group">
+    <Card className="overflow-hidden hover-elevate active-elevate-2 relative group touch-manipulation">
       <div className="relative aspect-[3/4]">
         <img
           src={image}

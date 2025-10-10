@@ -4,8 +4,10 @@ import { ProfileCard } from "@/components/ProfileCard";
 import { EventCard } from "@/components/EventCard";
 import { MembershipTiers } from "@/components/MembershipTiers";
 import { Button } from "@/components/ui/button";
-import { Grid, List } from "lucide-react";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Grid, List, Crown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { apiRequest } from "@/lib/queryClient";
 
 import profile1 from "@assets/stock_images/professional_portrai_3025a04c.jpg";
 import profile2 from "@assets/stock_images/professional_portrai_07fd91f6.jpg";
@@ -22,6 +24,19 @@ import event5 from "@assets/stock_images/cooking_class_with_d_1d5f94a6.jpg";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [topModels, setTopModels] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTopModels = async () => {
+      try {
+        const response = await apiRequest("GET", "/api/profiles/top-models");
+        setTopModels(response.profiles || []);
+      } catch (error) {
+        console.error("Failed to fetch top models:", error);
+      }
+    };
+    fetchTopModels();
+  }, []);
 
   //todo: remove mock functionality
   const mockProfiles = [
@@ -172,6 +187,39 @@ export default function Home() {
       <HeroSection />
 
       <div className="container mx-auto px-4 py-16">
+        {topModels.length > 0 && (
+          <section className="mb-16">
+            <div className="text-center mb-8">
+              <Badge className="mb-4 bg-gradient-to-r from-primary to-chart-2 text-white border-0">
+                <Crown className="h-4 w-4 mr-2" />
+                Featured Models
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-2">
+                Top Premium Models
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Connect with our most popular verified models
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {topModels.map((model) => (
+                <ProfileCard 
+                  key={model.id} 
+                  id={model.id}
+                  name={model.name}
+                  age={model.age}
+                  image={model.photos[0] || ''}
+                  location={model.location}
+                  profession={model.profession || ''}
+                  interests={model.interests}
+                  isOnline={model.isOnline}
+                  isVerified={model.isVerified}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-4">
             Event Categories

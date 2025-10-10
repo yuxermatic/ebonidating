@@ -168,3 +168,46 @@ export type Message = typeof messages.$inferSelect;
 
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+
+// Model earnings table
+export const modelEarnings = pgTable("model_earnings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  totalEarnings: integer("total_earnings").default(0).notNull(),
+  pendingEarnings: integer("pending_earnings").default(0).notNull(),
+  tier: text("tier").default("bronze").notNull(), // bronze, silver, gold, platinum
+  subscriberCount: integer("subscriber_count").default(0).notNull(),
+  viewCount: integer("view_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Model subscriptions table
+export const modelSubscriptions = pgTable("model_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  subscriberId: varchar("subscriber_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  modelId: varchar("model_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tier: text("tier").notNull(), // basic, premium, vip
+  price: integer("price").notNull(),
+  status: text("status").default("active").notNull(), // active, cancelled, expired
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertModelEarningsSchema = createInsertSchema(modelEarnings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertModelSubscriptionSchema = createInsertSchema(modelSubscriptions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertModelEarnings = z.infer<typeof insertModelEarningsSchema>;
+export type ModelEarnings = typeof modelEarnings.$inferSelect;
+
+export type InsertModelSubscription = z.infer<typeof insertModelSubscriptionSchema>;
+export type ModelSubscription = typeof modelSubscriptions.$inferSelect;
