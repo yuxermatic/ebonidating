@@ -143,10 +143,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============= PROFILE ROUTES =============
   app.get("/api/profiles/featured", async (req, res) => {
     try {
-      const featuredModels = await storage.getActiveFeaturedModels();
+      const profiles = await storage.getAllProfiles();
+      // Get featured models (verified with premium/vip membership)
+      const featuredModels = profiles
+        .filter(p => p.isVerified && (p.membershipTier === 'premium' || p.membershipTier === 'vip'))
+        .slice(0, 3);
+      
       res.json({ models: featuredModels });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error('[Featured Models Error]', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch featured models' });
     }
   });
 
