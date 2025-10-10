@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import Home from "@/pages/Home";
 import Browse from "@/pages/Browse";
 import Events from "@/pages/Events";
@@ -43,6 +44,7 @@ function App() {
               <main className="flex-1">
                 <Router />
               </main>
+              <Footer />
             </div>
             <Toaster />
           </TooltipProvider>

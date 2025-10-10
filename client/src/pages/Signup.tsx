@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 import { Heart } from "lucide-react";
 
 const signupSchema = z.object({
@@ -46,17 +47,22 @@ export default function Signup() {
   async function onSubmit(data: SignupForm) {
     setIsLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/signup", {
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/create-profile`,
+        }
       });
-      
+
+      if (error) throw error;
+
       toast({
-        title: "Welcome to Eboni Dating!",
-        description: "Account created successfully",
+        title: "Check your email!",
+        description: "We've sent you a verification link to complete your registration.",
       });
       
-      setLocation("/create-profile");
+      setLocation("/login");
     } catch (error: any) {
       toast({
         title: "Error",
