@@ -14,17 +14,21 @@ import {
 } from "@shared/schema";
 
 // Email configuration
-const transporter = nodemailer.createTransport({
+const transporter = process.env.SMTP_PASSWORD ? nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "587"),
   secure: false,
   auth: {
     user: process.env.SMTP_USER || "info@ebonidating.com",
-    pass: process.env.SMTP_PASSWORD || "",
+    pass: process.env.SMTP_PASSWORD,
   },
-});
+}) : null;
 
 async function sendEmail(to: string, subject: string, html: string) {
+  if (!transporter) {
+    console.warn("Email transporter not configured, skipping email to:", to);
+    return;
+  }
   try {
     await transporter.sendMail({
       from: '"Eboni Dating" <info@ebonidating.com>',

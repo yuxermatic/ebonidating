@@ -40,6 +40,7 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Failed to fetch top models:", error);
+        setTopModels([]); // Ensure topModels is an empty array on error
       }
     };
     fetchTopModels();
