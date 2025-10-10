@@ -116,6 +116,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============= PROFILE ROUTES =============
+  app.get("/api/profiles/top-models", async (req, res) => {
+    try {
+      const profiles = await storage.getAllProfiles();
+      // Get top 3 models based on membership tier and verification
+      const topModels = profiles
+        .filter(p => p.isVerified && p.membershipTier !== 'basic')
+        .sort((a, b) => {
+          const tierOrder = { vip: 3, premium: 2, basic: 1 };
+          return tierOrder[b.membershipTier as keyof typeof tierOrder] - tierOrder[a.membershipTier as keyof typeof tierOrder];
+        })
+        .slice(0, 3);
+      
+      res.json({ profiles: topModels });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/profiles", requireAuth, async (req, res) => {
     try {
       const { minAge, maxAge, distance, onlineOnly, verifiedOnly, interests } = req.query;
