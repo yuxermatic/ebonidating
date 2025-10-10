@@ -1,7 +1,3 @@
-"use client"
-
-import CategoryGridExample from "../client/src/components/examples/CategoryGrid"
-
-export default function SyntheticV0PageForDeployment() {
-  return <CategoryGridExample />
+export default function Home() {
+  return <div>Welcome to the Home page</div>
 }
