@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 import { Heart } from "lucide-react";
 
 const loginSchema = z.object({
@@ -41,7 +42,12 @@ export default function Login() {
   async function onSubmit(data: LoginForm) {
     setIsLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/login", data);
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) throw error;
       
       toast({
         title: "Welcome back!",

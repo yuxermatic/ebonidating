@@ -1,4 +1,4 @@
-import { 
+import {
   type User, type InsertUser,
   type Profile, type InsertProfile,
   type Event, type InsertEvent,
@@ -11,13 +11,14 @@ import {
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 
-const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL, {
+// Use POSTGRES_URL from Supabase if DATABASE_URL is not set
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+const sql = databaseUrl ? neon(databaseUrl, {
   fetchOptions: {
     cache: 'no-store',
   },
-  ...(process.env.NODE_ENV === 'production' && {
-    ssl: true,
-  }),
+  fullResults: true,
 }) : null;
 
 export interface IStorage {
@@ -25,12 +26,12 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Featured Models
   getFeaturedModel(type: "day" | "week" | "month"): Promise<any | undefined>;
   createFeaturedModel(model: any): Promise<any>;
   getActiveFeaturedModels(): Promise<any[]>;
-  
+
   // Profiles
   getProfile(id: string): Promise<Profile | undefined>;
   getProfileByUserId(userId: string): Promise<Profile | undefined>;
@@ -45,39 +46,39 @@ export interface IStorage {
   }): Promise<Profile[]>;
   createProfile(profile: InsertProfile & { userId: string }): Promise<Profile>;
   updateProfile(id: string, profile: Partial<InsertProfile>): Promise<Profile | undefined>;
-  
+
   // Events
   getEvent(id: string): Promise<Event | undefined>;
   getAllEvents(): Promise<Event[]>;
   getEventsByCategory(category: string): Promise<Event[]>;
   createEvent(event: InsertEvent): Promise<Event>;
   updateEventSpots(id: string, spotsAvailable: number): Promise<Event | undefined>;
-  
+
   // Event Registrations
   getEventRegistration(eventId: string, userId: string): Promise<EventRegistration | undefined>;
   getUserEventRegistrations(userId: string): Promise<EventRegistration[]>;
   createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration>;
   cancelEventRegistration(id: string): Promise<void>;
-  
+
   // Likes
   getLike(fromUserId: string, toUserId: string): Promise<Like | undefined>;
   getUserLikes(userId: string): Promise<Like[]>;
   getUserLikedBy(userId: string): Promise<Like[]>;
   createLike(like: InsertLike): Promise<Like>;
   deleteLike(id: string): Promise<void>;
-  
+
   // Matches
   getMatch(id: string): Promise<Match | undefined>;
   getUserMatches(userId: string): Promise<Match[]>;
   checkIfMatched(user1Id: string, user2Id: string): Promise<Match | undefined>;
   createMatch(match: InsertMatch): Promise<Match>;
-  
+
   // Messages
   getMessage(id: string): Promise<Message | undefined>;
   getMatchMessages(matchId: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: string): Promise<void>;
-  
+
   // Favorites
   getFavorite(userId: string, profileId: string): Promise<Favorite | undefined>;
   getUserFavorites(userId: string): Promise<Favorite[]>;
@@ -117,8 +118,8 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
+    const user: User = {
+      ...insertUser,
       id,
       createdAt: new Date()
     };
@@ -162,7 +163,7 @@ export class MemStorage implements IStorage {
       profiles = profiles.filter(p => p.isVerified);
     }
     if (filters.interests && filters.interests.length > 0) {
-      profiles = profiles.filter(p => 
+      profiles = profiles.filter(p =>
         p.interests.some(interest => filters.interests!.includes(interest))
       );
     }
@@ -409,10 +410,13 @@ export class PostgresStorage implements IStorage {
   private sql: ReturnType<typeof neon>;
 
   constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL environment variable is not set");
+    const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL or POSTGRES_URL environment variable is not set");
     }
-    this.sql = neon(process.env.DATABASE_URL);
+    // Supabase requires SSL to be enabled
+    const sslOptions = process.env.NODE_ENV === 'production' ? { ssl: { rejectUnauthorized: false } } : {};
+    this.sql = neon(databaseUrl, sslOptions);
   }
 
   // Users
@@ -490,8 +494,8 @@ export class PostgresStorage implements IStorage {
     const id = randomUUID();
     const result = await this.sql`
       INSERT INTO profiles (
-        id, user_id, name, age, gender, bio, location, profession, 
-        interests, photos, is_online, is_verified, membership_tier, 
+        id, user_id, name, age, gender, bio, location, profession,
+        interests, photos, is_online, is_verified, membership_tier,
         created_at, updated_at
       )
       VALUES (
@@ -643,7 +647,7 @@ export class PostgresStorage implements IStorage {
 
   async checkIfMatched(user1Id: string, user2Id: string): Promise<Match | undefined> {
     const result = await this.sql`
-      SELECT * FROM matches 
+      SELECT * FROM matches
       WHERE (user1_id = ${user1Id} AND user2_id = ${user2Id})
          OR (user1_id = ${user2Id} AND user2_id = ${user1Id})
     `;
@@ -750,6 +754,6 @@ export class PostgresStorage implements IStorage {
   }
 }
 
-export const storage = process.env.DATABASE_URL 
-  ? new PostgresStorage() 
+export const storage = process.env.DATABASE_URL || process.env.POSTGRES_URL
+  ? new PostgresStorage()
   : new MemStorage();
