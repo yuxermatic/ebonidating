@@ -20,14 +20,16 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Development files
-.replit
-replit.nix
 .cache
 .vscode
 .idea
 *.swp
 *.swo
 *~
+
+# Vercel-irrelevant: local server and dev configs
+server/
+.replit
 
 # Testing
 coverage
