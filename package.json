@@ -2,11 +2,21 @@
   "name": "ebonidating",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Static build completed'",
-    "start": "vercel dev"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
-    "@vercel/node": "^3.0.0"
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^22.6.0",
+    "@types/express": "^4.17.21"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
