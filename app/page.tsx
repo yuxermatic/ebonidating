@@ -1,60 +1,206 @@
+"use client"
+
+import { useState } from "react"
+
 export default function Home() {
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+
+  const features = [
+    {
+      icon: "⚡",
+      title: "Fast Performance",
+      description: "Built with Next.js for optimal speed and performance",
+    },
+    {
+      icon: "🎨",
+      title: "Modern Design",
+      description: "Beautiful UI components with Tailwind CSS and shadcn/ui",
+    },
+    {
+      icon: "🔒",
+      title: "Type Safe",
+      description: "Fully typed with TypeScript for better developer experience",
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-16">
-        <div className="flex flex-col items-center justify-center text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground text-balance">Welcome to Your App</h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
-              Get started by editing the home page or exploring the features below
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="text-2xl font-bold text-primary">Eboni</div>
+          <div className="flex gap-6">
+            <a href="#" className="text-foreground hover:text-primary transition-colors">
+              Home
+            </a>
+            <a href="#" className="text-foreground hover:text-primary transition-colors">
+              Features
+            </a>
+            <a href="#" className="text-foreground hover:text-primary transition-colors">
+              About
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <main className="container mx-auto px-4 py-20">
+        <div className="flex flex-col items-center justify-center text-center space-y-8 mb-20">
+          <div className="space-y-4 max-w-3xl">
+            <h1 className="text-5xl md:text-7xl font-bold text-foreground text-balance leading-tight">
+              Welcome to Your App
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty mx-auto">
+              Get started by exploring the features below or editing the home page to customize your experience
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mt-12">
-            <div className="bg-card border border-border rounded-lg p-6 space-y-3 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-card-foreground">Fast Performance</h3>
-              <p className="text-muted-foreground text-sm">Built with Next.js for optimal speed and performance</p>
-            </div>
+          <div className="flex gap-4 flex-wrap justify-center">
+            <button className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+              Get Started
+            </button>
+            <button className="px-8 py-3 border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors">
+              Learn More
+            </button>
+          </div>
+        </div>
 
-            <div className="bg-card border border-border rounded-lg p-6 space-y-3 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
-                  />
-                </svg>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              onMouseEnter={() => setHoveredCard(index)}
+              onMouseLeave={() => setHoveredCard(null)}
+              className={`bg-card border border-border rounded-xl p-8 space-y-4 transition-all duration-300 cursor-pointer ${
+                hoveredCard === index ? "shadow-lg border-primary/50 scale-105" : "hover:shadow-md"
+              }`}
+            >
+              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-3xl">
+                {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold text-card-foreground">Modern Design</h3>
-              <p className="text-muted-foreground text-sm">Beautiful UI components with Tailwind CSS and shadcn/ui</p>
+              <h3 className="text-xl font-semibold text-card-foreground">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
             </div>
+          ))}
+        </div>
 
-            <div className="bg-card border border-border rounded-lg p-6 space-y-3 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-card-foreground">Type Safe</h3>
-              <p className="text-muted-foreground text-sm">
-                Fully typed with TypeScript for better developer experience
-              </p>
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl mx-auto mt-20">
+          {[
+            { number: "100%", label: "Type Safe" },
+            { number: "0ms", label: "Cold Start" },
+            { number: "∞", label: "Scalability" },
+          ].map((stat, index) => (
+            <div key={index} className="text-center space-y-2">
+              <div className="text-4xl md:text-5xl font-bold text-primary">{stat.number}</div>
+              <div className="text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-muted/50 mt-20">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Product</h4>
+              <ul className="space-y-2 text-muted-foreground text-sm">
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Security
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Company</h4>
+              <ul className="space-y-2 text-muted-foreground text-sm">
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Careers
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Resources</h4>
+              <ul className="space-y-2 text-muted-foreground text-sm">
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Docs
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    API
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Legal</h4>
+              <ul className="space-y-2 text-muted-foreground text-sm">
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Terms
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-foreground transition-colors">
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between text-muted-foreground text-sm">
+            <p>&copy; 2025 Eboni. All rights reserved.</p>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <a href="#" className="hover:text-foreground transition-colors">
+                Twitter
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                GitHub
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                LinkedIn
+              </a>
             </div>
           </div>
         </div>
-      </main>
+      </footer>
     </div>
   )
 }
